@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Collections Entry</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        function submitCollectionsForm(event) {
+            event.preventDefault();
+
+            const data = {
+                date: document.getElementById("collectionsDate").value,
+                employeeId: parseInt(document.getElementById("collectionsEmployeeDropdown").value),
+                cashReceived: parseFloat(document.getElementById("cashReceived").value || 0),
+                cashReceivedStatus: document.getElementById("cashReceivedStatus").value,
+                phonePay: parseFloat(document.getElementById("phonePay").value || 0),
+                phonePayStatus: document.getElementById("phonePayStatus").value,
+                creditCard: parseFloat(document.getElementById("creditCard").value || 0),
+                creditCardStatus: document.getElementById("creditCardStatus").value,
+                borrowedAmount: parseFloat(document.getElementById("borrowedAmount").value || 0),
+                debtRecovered: parseFloat(document.getElementById("debtRecovered").value || 0),
+                borrower: document.getElementById("borrower").value,
+                badHandling: parseFloat(document.getElementById("badHandling").value || 0),
+                expenses: parseFloat(document.getElementById("expenses").value || 0)
+            };
+
+            // *** ADDED FOR DEBUGGING: Log the date string being sent ***
+            console.log("Collections Date being sent:", data.date);
+
+            fetch('/collections', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(msg => alert("Submitted: " + msg))
+            .catch(err => alert("Error: " + err));
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr("#collectionsDate", {
+                enableTime: true,
+                dateFormat: "dd-MM-yyyy HH:mm:ss", // Format for backend
+                altInput: true, // Display a human-friendly date
+                altFormat: "F j, Y h:i K", // Human-friendly display format
+                defaultDate: new Date()
+            });
+
+            fetch("/employees/active")
+                .then(response => response.json())
+                .then(data => {
+                    const collectionsDropdown = document.getElementById("collectionsEmployeeDropdown");
+                    collectionsDropdown.innerHTML = '<option value="">Select Employee ID and Name</option>';
+                    data.forEach(emp => {
+                        const option = document.createElement("option");
+                        option.value = emp.employeeId;
+                        option.text = emp.employeeId + ' - ' + emp.employeeName;
+                        collectionsDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching employees:', error);
+                    alert('Failed to load employee data for collections form.');
+                });
+        });
+    </script>
+</head>
+<body>
+<h1>Collections Entry</h1>
+
+<form id="collectionsForm" onsubmit="submitCollectionsForm(event)">
+    <label>Date:</label>
+    <input type="text" class="form-control" id="collectionsDate" name="collectionsDate" placeholder="Select Collections Date" required>
+
+    <label>Employee ID:</label>
+    <select class="form-control" id="collectionsEmployeeDropdown" name="collectionsEmployeeDropdown" required>
+        <option value="">Select Employee ID and Name</option>
+    </select>
+
+    <label>Cash Received:</label>
+    <input type="number" step="any" id="cashReceived"><br>
+
+    <label>Cash Received Status:</label>
+    <input type="text" id="cashReceivedStatus"><br>
+
+    <label>PhonePay:</label>
+    <input type="number" step="any" id="phonePay"><br>
+
+    <label>PhonePay Status:</label>
+    <input type="text" id="phonePayStatus"><br>
+
+    <label>Credit Card:</label>
+    <input type="number" step="any" id="creditCard"><br>
+
+    <label>Credit Card Status:</label>
+    <input type="text" id="creditCardStatus"><br>
+
+    <label>Borrowed Amount:</label>
+    <input type="number" step="any" id="borrowedAmount"><br>
+
+    <label>Debt Recovered:</label>
+    <input type="number" step="any" id="debtRecovered"><br>
+
+    <label>Borrower:</label>
+    <input type="text" id="borrower"><br>
+
+    <label>Bad Handling:</label>
+    <input type="number" step="any" id="badHandling"><br>
+
+    <label>Expenses:</label>
+    <input type="number" step="any" id="expenses"><br><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>
